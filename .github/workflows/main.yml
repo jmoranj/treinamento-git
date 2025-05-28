@@ -1,0 +1,37 @@
+name: Deploy - production
+
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      
+      - name: Checar repo
+        uses: actions/checkout@v2
+        with: 
+          token: ${{ secrets.GH_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 20.x
+
+      - name: Instalar semver
+        run: npm install -g semver
+
+      - name: Criar uma nova tag se não existir
+        id: create_initial_tag
+        env: 
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          if [ -z "$(git tag)" ]; then
+            git config --global user.name 'github-actions'
+            git config --global user.mail 'github-actions@github.com'
+            git tag -a v0.0.0 -m "Initial Release"
+            git push origin v0.0.0
+          fi
